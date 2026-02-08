@@ -1,9 +1,7 @@
 import React from 'react';
 import type { ScamAnalysisResponse, RiskLevel } from '@/api/types';
-import { ShieldAlert, ShieldCheck, AlertTriangle, Info, Clock, Bot, FileText, CheckCircle2 } from 'lucide-react';
-import { cn } from '@/lib/utils'; // Assuming this exists from prev context
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card'; // Assuming these exist or I'll use div/styles if not found
-// Checking existing generic components or using standard tailwind.
+import { ShieldAlert, ShieldCheck, AlertTriangle, Info, Clock, FileText, CheckCircle2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const getRiskColor = (level: RiskLevel) => {
     switch (level) {

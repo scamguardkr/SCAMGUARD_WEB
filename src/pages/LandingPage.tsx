@@ -1,10 +1,8 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import {
     ShieldAlert,
     Zap,
     Users,
-    Mic,
     CheckCircle,
     Brain,
     Database
