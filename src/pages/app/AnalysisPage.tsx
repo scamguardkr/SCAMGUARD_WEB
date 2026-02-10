@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/Button';
 import { ShieldAlert, Plus, MessageSquare, LogOut, Send, Paperclip, Mic, Image as ImageIcon, Zap, Bot } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getAvailableModels, analyzeScam, getUserAnalyzeReportList, getUserDetailAnalyzeReport } from '@/api/scam';
+import { getAvailableModels, analyzeScamV2, getUserAnalyzeReportList, getUserDetailAnalyzeReportV2 } from '@/api/scam';
 import { Dropdown } from '@/components/ui/Dropdown';
-import type { ScamAnalysisResponse, ScamAnalysisHistoryListResponse } from '@/api/types';
+import type { ScamAnalysisHistoryListResponse } from '@/api/types';
+import type { LlmScamAnalysisResultV2, AnalysisDetails } from '@/types/scam-analysis';
 import AnalysisResult from '@/components/app/AnalysisResult';
 
 const AnalysisPage = () => {
@@ -16,7 +17,8 @@ const AnalysisPage = () => {
 
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [loadingStep, setLoadingStep] = useState(0);
-    const [analysisResult, setAnalysisResult] = useState<ScamAnalysisResponse | null>(null);
+    const [analysisResult, setAnalysisResult] = useState<LlmScamAnalysisResultV2 | null>(null);
+    const [analysisDetails, setAnalysisDetails] = useState<AnalysisDetails | null>(null);
     const [input, setInput] = useState('');
     const [messages, setMessages] = useState<{ role: 'user' | 'assistant', content: string }[]>([]);
     const [availableModels, setAvailableModels] = useState<string[]>([]);
@@ -25,8 +27,10 @@ const AnalysisPage = () => {
 
     const loadingSteps = [
         "텍스트 패턴 분석 중...",
-        "사기 데이터베이스 대조 중...",
-        "위험 요소 평가 중...",
+        "위험 신호 탐지 중...",
+        "심리 전술 분석 중...",
+        "유사 사례 매칭 중...",
+        "종합 위험도 평가 중...",
         "최종 리포트 생성 중..."
     ];
 
@@ -68,34 +72,34 @@ const AnalysisPage = () => {
             // Detail View Mode
             const fetchDetail = async () => {
                 setAnalysisResult(null);
+                setAnalysisDetails(null);
                 setMessages([]);
                 setInput('');
                 try {
-                    const response = await getUserDetailAnalyzeReport(id);
+                    const response = await getUserDetailAnalyzeReportV2(id);
                     if (response.status === 'success') {
                         const data = response.data;
-                        // Populate state with detail data
-                        setInput(data.prompt);
-                        setSelectedModel(data.aiModel); // Assuming aiModel matches available models
-
-                        // Reconstruct result object
-                        const reconstructedResult: ScamAnalysisResponse = {
-                            risk_level: data.riskLevel,
-                            similarity_score: data.similarityScore,
-                            scam_type: data.scamType,
-                            detected_risks: data.detectedRisks.map(r => ({ name: r.name, description: r.description })),
-                            similar_case: { name: data.similarCase.name, information: data.similarCase.information },
-                            analysis_details: {
-                                model: data.analysisDetails.model,
-                                analysis_time: data.analysisDetails.analysis_time,
-                                total_processing_time_ms: data.analysisDetails.total_processing_time_ms
+                        // V2 응답 데이터 사용
+                        if (data.analysisSummary) {
+                            // LLM 분석 결과가 있는 경우
+                            setInput(data.prompt.substring(0, 100) + '...');
+                            setAnalysisResult({
+                                analysisSummary: data.analysisSummary,
+                                riskAssessment: data.riskAssessment,
+                                scamClassification: data.scamClassification,
+                                detectedSignals: data.detectedSignals,
+                                psychologicalTactics: data.psychologicalTactics,
+                                similarCases: data.similarCases,
+                                recommendation: data.recommendation
+                            });
+                            if (data.analysisDetails) {
+                                setAnalysisDetails(data.analysisDetails);
                             }
-                        };
-                        setAnalysisResult(reconstructedResult);
-                        setMessages([
-                            { role: 'user', content: data.prompt },
-                            { role: 'assistant', content: '분석 결과입니다.' }
-                        ]);
+                            setMessages([
+                                { role: 'user', content: data.prompt.substring(0, 100) + '...' },
+                                { role: 'assistant', content: '분석 결과입니다.' }
+                            ]);
+                        }
                     }
                 } catch (error) {
                     console.error("Failed to fetch detail", error);
@@ -111,18 +115,19 @@ const AnalysisPage = () => {
 
     const resetState = () => {
         setAnalysisResult(null);
+        setAnalysisDetails(null);
         setMessages([]);
         setInput('');
         setIsAnalyzing(false);
     };
 
     useEffect(() => {
-        let interval: any;
+        let interval: number;
         if (isAnalyzing) {
             setLoadingStep(0);
             interval = setInterval(() => {
                 setLoadingStep((prev) => (prev < loadingSteps.length - 1 ? prev + 1 : prev));
-            }, 6000); // Change step every 6 seconds (total ~24s for first 4 steps, then wait)
+            }, 5000);
         }
         return () => clearInterval(interval);
     }, [isAnalyzing]);
@@ -139,14 +144,18 @@ const AnalysisPage = () => {
         setIsAnalyzing(true);
 
         try {
-            // Call API
-            const response = await analyzeScam({ prompt: userMessage }, selectedModel);
+            // Call V2 API
+            const response = await analyzeScamV2({ prompt: userMessage }, selectedModel);
 
-            if (response.status === 'success') {
-                setAnalysisResult(response.data);
-                setMessages(prev => [...prev, { role: 'assistant', content: '분석이 완료되었습니다. 아래 리포트를 확인해주세요.' }]);
+            if (response.status === 'success' && response.data.isValidAnalysis && response.data.analysisResult) {
+                setAnalysisResult(response.data.analysisResult);
+                if (response.data.analysisDetails) {
+                    setAnalysisDetails(response.data.analysisDetails);
+                }
+                setMessages(prev => [...prev, { role: 'assistant', content: '분석이 완료되었습니다. 아래 상세 리포트를 확인해주세요.' }]);
             } else {
-                setMessages(prev => [...prev, { role: 'assistant', content: `분석 실패: ${response.errorMessage || '알 수 없는 오류가 발생했습니다.'}` }]);
+                const errorMsg = response.data.invalidReason || response.errorMessage || '알 수 없는 오류가 발생했습니다.';
+                setMessages(prev => [...prev, { role: 'assistant', content: `분석 실패: ${errorMsg}` }]);
             }
 
         } catch (error) {
@@ -273,7 +282,7 @@ const AnalysisPage = () => {
                             </div>
                         </div>
                     ) : (
-                        <div className="space-y-6 max-w-3xl mx-auto pb-10">
+                        <div className="space-y-6 max-w-4xl mx-auto pb-10">
                             {messages.map((msg, idx) => (
                                 <div key={idx} className={cn("flex gap-4", msg.role === 'user' ? "justify-end" : "justify-start")}>
                                     {msg.role === 'assistant' && (
@@ -319,7 +328,7 @@ const AnalysisPage = () => {
                             )}
 
                             {!isAnalyzing && analysisResult && (
-                                <AnalysisResult result={analysisResult} />
+                                <AnalysisResult result={analysisResult} analysisDetails={analysisDetails || undefined} />
                             )}
                         </div>
                     )}
@@ -386,7 +395,14 @@ const AnalysisPage = () => {
     );
 };
 
-const CardExample = ({ icon, title, desc, onClick }: any) => (
+interface CardExampleProps {
+    icon: React.ReactNode;
+    title: string;
+    desc: string;
+    onClick?: () => void;
+}
+
+const CardExample = ({ icon, title, desc, onClick }: CardExampleProps) => (
     <button onClick={onClick} className="p-4 rounded-xl border border-gray-200 hover:border-primary/50 hover:bg-primary/5 transition-all text-left group">
         <div className="flex items-center gap-3 mb-2">
             {icon}

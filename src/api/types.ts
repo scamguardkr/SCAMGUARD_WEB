@@ -43,7 +43,7 @@ export interface RegisterRequest {
 // Response Types (Aliases for convenience)
 export type AuthResponse = CommonResponse<AuthResult>;
 export type ProfileResponse = CommonResponse<UserProfile>;
-export type RefreshResponse = CommonResponse<AuthResult>;
+// export type RefreshResponse = CommonResponse<AuthResult>;
 
 // Scam/Analysis Models
 export interface AvailableModelsResponse {
@@ -55,16 +55,15 @@ export interface ScamAnalysisRequest {
 }
 
 export type RiskLevel = "NONE" | "LOW" | "SUSPICIOUS" | "DANGEROUS" | "VERY_DANGEROUS";
-export type AiModelType = "GPT_5_NANO" | "DEEPSEEK_R1_0528" | "LLAMA_3_1_405B" | "GPT_OSS_120B";
 
-export interface ScamAnalysisResponse {
-    risk_level: RiskLevel;
-    similarity_score: number;
-    scam_type: string;
-    detected_risks: DetectedRisk[];
-    similar_case: SimilarCase;
-    analysis_details: AnalysisDetails;
-}
+// export interface ScamAnalysisResponse {
+//     risk_level: RiskLevel;
+//     similarity_score: number;
+//     scam_type: string;
+//     detected_risks: DetectedRisk[];
+//     similar_case: SimilarCase;
+//     analysis_details: AnalysisDetails;
+// }
 
 export interface DetectedRisk {
     name: string;
@@ -78,8 +77,8 @@ export interface SimilarCase {
 
 export interface AnalysisDetails {
     model: string;
-    analysis_time: string; // LocalDateTime string
-    total_processing_time_ms: number;
+    analysisTime: string; // LocalDateTime string
+    totalProcessingTimeMs: number;
 }
 
 // History API Responses
@@ -95,22 +94,20 @@ export interface ScamAnalysisHistoryPageResponse {
 export interface ScamAnalysisHistoryListResponse {
     documentId: string;
     scamType: string;
-    createdAt: string; // LocalDateTime
-    riskLevel?: RiskLevel;
-    similarityScore?: number;
+    createdAt: string; 
 }
 
-// Detail API Response
-export interface ScamAnalysisDetailResponse {
-    documentId: string;
-    userId: number;
-    prompt: string;
-    aiModel: AiModelType;
-    riskLevel: RiskLevel;
-    similarityScore: number;
-    scamType: string;
-    detectedRisks: DetectedRisk[]; // Reusing DetectedRisk if structure matches, else create DetectedRiskDetail
-    similarCase: SimilarCase;       // Reusing SimilarCase
-    analysisDetails: AnalysisDetails; // Reusing AnalysisDetails
-    createdAt: string;
-}
+// // Detail API Response
+// export interface ScamAnalysisDetailResponse {
+//     documentId: string;
+//     userId: number;
+//     prompt: string;
+//     aiModel: string;
+//     riskLevel: RiskLevel;
+//     similarityScore: number;
+//     scamType: string;
+//     detectedRisks: DetectedRisk[]; // Reusing DetectedRisk if structure matches, else create DetectedRiskDetail
+//     similarCase: SimilarCase;       // Reusing SimilarCase
+//     analysisDetails: AnalysisDetails; // Reusing AnalysisDetails
+//     createdAt: string;
+// }
