@@ -1,6 +1,6 @@
 import { client } from './client';
-import type { CommonResponse, AvailableModelsResponse, ScamAnalysisRequest, ScamAnalysisHistoryPageResponse } from './types';
-import type {ScamAnalysisDetailResponseV2, ScamAnalysisResponseV2} from "@/types/scam-analysis.ts";
+import type { CommonResponse, AvailableModelsResponse, ScamAnalysisRequest, ScamAnalysisHistoryPageResponse, ScamDocumentV2Request } from './types';
+import type { ScamAnalysisDetailResponseV2, ScamAnalysisResponseV2 } from "@/types/scam-analysis.ts";
 
 export const getAvailableModels = async () => {
     const response = await client.get<CommonResponse<AvailableModelsResponse>>('/api/v1/scam/model/available');
@@ -31,5 +31,10 @@ export const getUserAnalyzeReportList = async (page: number = 1, limit: number =
 
 export const getUserDetailAnalyzeReportV2 = async (id: string) => {
     const response = await client.get<CommonResponse<ScamAnalysisDetailResponseV2>>(`/api/v2/scam/analyze/result/${id}`);
+    return response.data;
+};
+
+export const collectScamDocumentV2 = async (data: ScamDocumentV2Request) => {
+    const response = await client.post<CommonResponse<void>>('/api/v2/scam/documents', data);
     return response.data;
 };

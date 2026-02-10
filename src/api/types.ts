@@ -81,6 +81,33 @@ export interface AnalysisDetails {
     totalProcessingTimeMs: number;
 }
 
+// V2 Document Collection Request
+export interface ScamDocumentV2Request {
+    scamTitle: string;
+    scamType: string;
+    scamSubType: string;
+    occurredPeriod: string;
+    targetProfile: string;
+    contactChannel: string;
+    scamScenario: {
+        step: number;
+        phase: string;
+        description: string;
+    }[];
+    keyPhrases: string[];
+    psychologicalTactics: string[];
+    financialMechanism: string;
+    damageScale: string;
+    redFlags: {
+        signal: string;
+        description: string;
+    }[];
+    preventionTips: string[];
+    vectorContent: string;
+    sourceUrl: string;
+    publishedDate: string;
+}
+
 // History API Responses
 export interface ScamAnalysisHistoryPageResponse {
     contents: ScamAnalysisHistoryListResponse[];
@@ -94,7 +121,7 @@ export interface ScamAnalysisHistoryPageResponse {
 export interface ScamAnalysisHistoryListResponse {
     documentId: string;
     scamType: string;
-    createdAt: string; 
+    createdAt: string;
 }
 
 // // Detail API Response

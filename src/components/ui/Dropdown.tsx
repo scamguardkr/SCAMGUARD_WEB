@@ -87,7 +87,9 @@ export const Dropdown = ({
                     {options.map((option) => (
                         <button
                             key={option}
+                            type="button"
                             onClick={() => handleSelect(option)}
+
                             className={cn(
                                 "flex items-center justify-between w-full px-4 py-2.5 text-sm text-left hover:bg-gray-50 transition-colors",
                                 value === option ? "text-primary font-medium bg-primary/5" : "text-gray-700"

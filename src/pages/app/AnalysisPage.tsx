@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
-import { ShieldAlert, Plus, MessageSquare, LogOut, Send, Paperclip, Mic, Image as ImageIcon, Zap, Bot } from 'lucide-react';
+import { ShieldAlert, MessageSquare, LogOut, Send, Paperclip, Mic, Image as ImageIcon, Zap, Bot } from 'lucide-react';
+
 import { cn } from '@/lib/utils';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getAvailableModels, analyzeScamV2, getUserAnalyzeReportList, getUserDetailAnalyzeReportV2 } from '@/api/scam';
@@ -9,6 +10,8 @@ import { Dropdown } from '@/components/ui/Dropdown';
 import type { ScamAnalysisHistoryListResponse } from '@/api/types';
 import type { LlmScamAnalysisResultV2, AnalysisDetails } from '@/types/scam-analysis';
 import AnalysisResult from '@/components/app/AnalysisResult';
+import AnalysisSidebar from '@/components/app/AnalysisSidebar';
+
 
 const AnalysisPage = () => {
     const { user, logout } = useAuth();
@@ -34,6 +37,18 @@ const AnalysisPage = () => {
         "최종 리포트 생성 중..."
     ];
 
+    // Fetch History
+    const fetchHistory = async () => {
+        try {
+            const response = await getUserAnalyzeReportList(1, 20);
+            if (response.status === 'success') {
+                setHistoryList(response.data.contents);
+            }
+        } catch (error) {
+            console.error("Failed to fetch history", error);
+        }
+    };
+
     // Initialize & Fetch Logic
     useEffect(() => {
         // Fetch Models
@@ -51,20 +66,9 @@ const AnalysisPage = () => {
             }
         };
         fetchModels();
-
-        // Fetch History
-        const fetchHistory = async () => {
-            try {
-                const response = await getUserAnalyzeReportList(1, 20);
-                if (response.status === 'success') {
-                    setHistoryList(response.data.contents);
-                }
-            } catch (error) {
-                console.error("Failed to fetch history", error);
-            }
-        };
         fetchHistory();
     }, []);
+
 
     // Handle ID change (Detail View vs New Analysis)
     useEffect(() => {
@@ -96,14 +100,14 @@ const AnalysisPage = () => {
                                 setAnalysisDetails(data.analysisDetails);
                             }
                             setMessages([
-                                { role: 'user', content: data.prompt.substring(0, 100) + '...' },
+                                { role: 'user', content: data.prompt },
                                 { role: 'assistant', content: '분석 결과입니다.' }
                             ]);
                         }
                     }
                 } catch (error) {
                     console.error("Failed to fetch detail", error);
-                    navigate('/app'); // Fallback to new analysis on error
+                    navigate('/app');
                 }
             };
             fetchDetail();
@@ -153,6 +157,8 @@ const AnalysisPage = () => {
                     setAnalysisDetails(response.data.analysisDetails);
                 }
                 setMessages(prev => [...prev, { role: 'assistant', content: '분석이 완료되었습니다. 아래 상세 리포트를 확인해주세요.' }]);
+                fetchHistory(); // Refresh sidebar history
+
             } else {
                 const errorMsg = response.data.invalidReason || response.errorMessage || '알 수 없는 오류가 발생했습니다.';
                 setMessages(prev => [...prev, { role: 'assistant', content: `분석 실패: ${errorMsg}` }]);
@@ -169,62 +175,18 @@ const AnalysisPage = () => {
     return (
         <div className="flex h-screen bg-background font-sans overflow-hidden">
             {/* Sidebar */}
-            <aside className="w-64 bg-gray-50 border-r flex flex-col hidden md:flex">
-                <div className="p-4 border-b">
-                    <Button
-                        className="w-full justify-start gap-2"
-                        variant={!id ? "default" : "outline"}
-                        onClick={() => navigate('/app')}
-                    >
-                        <Plus className="h-4 w-4" />
-                        새로운 분석
-                    </Button>
-                </div>
+            <AnalysisSidebar
+                historyList={historyList}
+                currentId={id}
+                onNewAnalysis={() => navigate('/app')}
+                onHistoryItemClick={(id) => navigate(`/app/${id}`)}
+                user={user}
+                onLogout={async () => {
+                    await logout();
+                    navigate('/');
+                }}
+            />
 
-                <div className="flex-1 overflow-y-auto p-4 space-y-2">
-                    <p className="text-xs font-semibold text-gray-500 mb-2">최근 기록</p>
-                    {historyList.length === 0 && (
-                        <div className="text-center py-4 text-xs text-gray-400">
-                            기록이 없습니다.
-                        </div>
-                    )}
-                    {historyList.map(item => (
-                        <Button
-                            key={item.documentId}
-                            variant={id === item.documentId ? "secondary" : "ghost"}
-                            className="w-full justify-start text-sm truncate h-auto py-2 font-normal text-gray-700"
-                            onClick={() => navigate(`/app/${item.documentId}`)}
-                        >
-                            <MessageSquare className="h-4 w-4 mr-2 shrink-0" />
-                            <span className="truncate">{item.scamType || "분석 결과"}</span>
-                        </Button>
-                    ))}
-                </div>
-
-                <div className="p-4 border-t bg-white">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
-                            {user?.name?.[0] || 'U'}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{user?.name || '사용자'}</p>
-                            <p className="text-xs text-gray-500 truncate">{user?.userEmail || 'user@example.com'}</p>
-                        </div>
-                    </div>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
-                        onClick={async () => {
-                            await logout();
-                            navigate('/');
-                        }}
-                    >
-                        <LogOut className="h-4 w-4 mr-2" />
-                        로그아웃
-                    </Button>
-                </div>
-            </aside>
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col min-w-0 bg-white">
@@ -250,11 +212,11 @@ const AnalysisPage = () => {
                                 무엇이 의심되시나요?
                             </h2>
                             <p className="text-gray-500">
-                                문자 메시지, 통화 녹음, 캡처 이미지 등을 업로드하거나<br />
-                                상황을 설명해주시면 AI가 즉시 분석해드립니다.
+                                사기 의심 상황을 텍스트로 입력해주세요!<br />
+                                방대한 사기 인텔리전스 데이터를 바탕으로 AI가 즉시 분석해드립니다.
                             </p>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full text-left">
+                            {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full text-left">
                                 <CardExample
                                     icon={<MessageSquare className="h-5 w-5 text-blue-500" />}
                                     title="문자 메시지 분석"
@@ -279,7 +241,7 @@ const AnalysisPage = () => {
                                     desc="최근 유행하는 사기 수법을 확인하세요."
                                     onClick={() => setInput("최근 유행하는 스미싱 수법 알려줘")}
                                 />
-                            </div>
+                            </div> */}
                         </div>
                     ) : (
                         <div className="space-y-6 max-w-4xl mx-auto pb-10">
@@ -347,10 +309,20 @@ const AnalysisPage = () => {
                                 direction="up"
                                 disabled={!!id || isAnalyzing || !!analysisResult}
                                 trigger={
-                                    <Button disabled={!!id || isAnalyzing || !!analysisResult} type="button" variant="ghost" size="icon" className={cn("h-10 w-10 rounded-lg text-gray-500 hover:text-gray-700", selectedModel ? "text-primary" : "")}>
+                                    <Button
+                                        disabled={!!id || isAnalyzing || !!analysisResult}
+                                        type="button"
+                                        variant="ghost"
+                                        className={cn(
+                                            "h-10 px-3 flex items-center gap-2 rounded-lg text-gray-500 hover:text-gray-700 transition-colors",
+                                            selectedModel ? "bg-primary/5 text-primary border border-primary/20" : ""
+                                        )}
+                                    >
                                         <Bot className="h-5 w-5" />
+                                        <span className="text-xs font-medium hidden sm:inline">{selectedModel || "모델 선택"}</span>
                                     </Button>
                                 }
+
                             />
 
                             <Button disabled={!!id || isAnalyzing || !!analysisResult} type="button" variant="ghost" size="icon" className="h-10 w-10 rounded-lg text-gray-500 hover:text-gray-700">
