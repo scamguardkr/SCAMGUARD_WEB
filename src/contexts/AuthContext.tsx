@@ -23,14 +23,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
             const token = Cookies.get('accessToken');
             if (token) {
-                // Set token in header manually if not yet intercepted (though interceptor handles it)
-                // client.defaults.headers.common['Authorization'] = `Bearer ${token}`; 
                 const profile = await authApi.getProfile();
                 setUser(profile.data);
             }
         } catch (error) {
             console.error('Failed to fetch profile:', error);
-            // If 401, client interceptor will handle refresh or logout
         } finally {
             setIsLoading(false);
         }

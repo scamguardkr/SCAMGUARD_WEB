@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
-import { ShieldAlert, MessageSquare, LogOut, Send, Paperclip, Mic, Image as ImageIcon, Zap, Bot } from 'lucide-react';
+import { ShieldAlert, LogOut, Send, Paperclip, Image as Bot } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -367,21 +367,21 @@ const AnalysisPage = () => {
     );
 };
 
-interface CardExampleProps {
-    icon: React.ReactNode;
-    title: string;
-    desc: string;
-    onClick?: () => void;
-}
+// interface CardExampleProps {
+//     icon: React.ReactNode;
+//     title: string;
+//     desc: string;
+//     onClick?: () => void;
+// }
 
-const CardExample = ({ icon, title, desc, onClick }: CardExampleProps) => (
-    <button onClick={onClick} className="p-4 rounded-xl border border-gray-200 hover:border-primary/50 hover:bg-primary/5 transition-all text-left group">
-        <div className="flex items-center gap-3 mb-2">
-            {icon}
-            <span className="font-semibold text-gray-900 group-hover:text-primary transition-colors">{title}</span>
-        </div>
-        <p className="text-sm text-gray-500">{desc}</p>
-    </button>
-);
+// const CardExample = ({ icon, title, desc, onClick }: CardExampleProps) => (
+//     <button onClick={onClick} className="p-4 rounded-xl border border-gray-200 hover:border-primary/50 hover:bg-primary/5 transition-all text-left group">
+//         <div className="flex items-center gap-3 mb-2">
+//             {icon}
+//             <span className="font-semibold text-gray-900 group-hover:text-primary transition-colors">{title}</span>
+//         </div>
+//         <p className="text-sm text-gray-500">{desc}</p>
+//     </button>
+// );
 
 export default AnalysisPage;
