@@ -25,7 +25,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, analysisDetails
 
     return (
         <div className="space-y-6 w-full animate-in fade-in slide-in-from-bottom-5 duration-700">
-            {/* Main Risk Assessment Card */}
+            {/* 메인 분석 리포트 컴포넌트 */}
             <MainRiskCard
                 riskAssessment={riskAssessment}
                 scamClassification={scamClassification}
@@ -33,19 +33,19 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, analysisDetails
                 analysisDetails={analysisDetails}
             />
 
-            {/* Detected Signals */}
+            {/* 탐지된 위협 신호 컴포넌트 */}
             <DetectedSignals detectedSignals={detectedSignals} />
 
-            {/* Psychological Tactics */}
+            {/* 심리 전술 분석 컴포넌트 */}
             <PsychologicalTactics psychologicalTactics={psychologicalTactics} />
 
-            {/* Similar Cases */}
+            {/* 유사 사기 사례 컴포넌트 */}
             <SimilarCases similarCases={similarCases} />
 
-            {/* Recommendations */}
+            {/* 대응 권고 컴포넌트 */}
             <Recommendations recommendation={recommendation} />
 
-            {/* Disclaimer */}
+            {/* 면책 조항 컴포넌트 */}
             <Disclaimer />
         </div>
     );

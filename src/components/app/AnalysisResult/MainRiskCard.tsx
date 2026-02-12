@@ -1,9 +1,8 @@
 import React from 'react';
-import { Brain, Cpu, Clock, Timer, ShieldAlert, Target } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Brain as BrainIcon, Share2 as ShareIcon, Download as DownloadIcon, ShieldAlert, Fingerprint } from 'lucide-react';
 import type { LlmScamAnalysisResultV2, AnalysisDetails } from '@/types/scam-analysis';
 import { riskConfig, scamTypeLabels } from './constants';
-import CircularProgress from './CircularProgress';
+import TravelExploreIcon from '@mui/icons-material/TravelExplore';
 
 interface MainRiskCardProps {
     riskAssessment: LlmScamAnalysisResultV2['riskAssessment'];
@@ -35,9 +34,9 @@ const MainRiskCard: React.FC<MainRiskCardProps> = ({
                     parseInt(second || '0')
                 );
                 if (!isNaN(date.getTime())) {
-                    return date.toLocaleString('ko-KR', {
+                    return date.toLocaleString('en-US', {
                         year: 'numeric',
-                        month: 'long',
+                        month: 'short',
                         day: 'numeric',
                         hour: '2-digit',
                         minute: '2-digit'
@@ -50,138 +49,111 @@ const MainRiskCard: React.FC<MainRiskCardProps> = ({
         }
     };
 
-    const formatProcessingTime = (ms: number | string | undefined) => {
-        if (ms === undefined || ms === null) return '-';
-        const numMs = typeof ms === 'string' ? parseInt(ms, 10) : ms;
-        if (isNaN(numMs)) return '-';
-        if (numMs <= 0) return '-';
-        if (numMs < 1000) return `${numMs}ms`;
-        if (numMs < 60000) return `${(numMs / 1000).toFixed(1)}초`;
-        return `${(numMs / 60000).toFixed(1)}분`;
-    };
+    const riskScore = riskAssessment.riskScore;
+    const strokeDasharray = `${riskScore}, 100`;
 
     return (
-        <div className={cn(
-            "relative overflow-hidden rounded-2xl border-2 p-6 md:p-8 shadow-lg",
-            riskConfig_data.bgColor,
-            riskConfig_data.borderColor
-        )}>
-            {/* Background Pattern */}
-            <div className="absolute top-0 right-0 w-64 h-64 opacity-5">
-                <ShieldAlert className="w-full h-full" />
-            </div>
-
-            <div className="relative z-10">
-                {/* Header - Single Row Layout */}
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-                    {/* Left: AI Report Badge + Confidence */}
-                    <div className="flex items-center gap-3">
-                        <span className={cn(
-                            "px-4 py-2 rounded-full text-sm font-bold border-2 bg-white shadow-sm",
-                            riskConfig_data.color,
-                            riskConfig_data.borderColor
-                        )}>
-                            <span className="flex items-center gap-2">
-                                <Brain className="w-4 h-4" />
-                                AI 분석 리포트
-                            </span>
-                        </span>
-                        <span className={cn(
-                            "px-3 py-1.5 rounded-lg text-sm font-bold border bg-white/80",
-                            riskConfig_data.color,
-                            riskConfig_data.borderColor
-                        )}>
-                            신뢰도 {riskAssessment.confidenceLevel}%
-                        </span>
-                    </div>
-
-                    {/* Right: Model & Time Info */}
-                    {analysisDetails && (
-                        <div className="flex flex-wrap items-center gap-3 text-xs">
-                            <div className="flex items-center gap-1.5 bg-white/70 px-2.5 py-1.5 rounded-lg border border-current/20">
-                                <Cpu className="w-3.5 h-3.5 text-gray-500" />
-                                <span className="font-semibold text-gray-700">{analysisDetails.model}</span>
-                            </div>
-
-                            <div className="flex items-center gap-1.5 bg-white/70 px-2.5 py-1.5 rounded-lg border border-current/20">
-                                <Clock className="w-3.5 h-3.5 text-gray-500" />
-                                <span className="text-gray-600">{formatAnalysisTime(analysisDetails.analysisTime)}</span>
-                            </div>
-
-                            <div className="flex items-center gap-1.5 bg-white/70 px-2.5 py-1.5 rounded-lg border border-current/20">
-                                <Timer className="w-3.5 h-3.5 text-gray-500" />
-                                <span className="text-gray-600">{formatProcessingTime(analysisDetails.totalProcessingTimeMs)}</span>
-                            </div>
+        <div className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 md:p-8 transition-colors duration-200">
+            <div className="flex flex-col lg:flex-row gap-8 items-center lg:items-start">
+                {/* Risk Gauge */}
+                <div className="flex-shrink-0 flex flex-col items-center relative gap-4">
+                    <div className="relative w-48 h-48">
+                        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                            {/* Background Circle */}
+                            <path
+                                className="text-gray-100 dark:text-gray-800"
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="3"
+                            />
+                            {/* Value Circle */}
+                            <path
+                                className="text-primary gauge-circle"
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeDasharray={strokeDasharray}
+                                strokeWidth="3"
+                                style={{
+                                    transition: 'stroke-dasharray 1.5s ease-out'
+                                }}
+                            />
+                        </svg>
+                        <div className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center text-center">
+                            <span className="text-4xl font-sans font-bold text-gray-900 dark:text-white">{riskScore}</span>
+                            <span className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 font-semibold mt-1">RISK SCORE</span>
                         </div>
-                    )}
-                </div>
-
-                {/* Main Content */}
-                <div className="flex flex-col md:flex-row gap-8 items-center">
-                    {/* Risk Level Badge & Description */}
-                    <div className="flex-1 text-center md:text-left">
-                        <div className={cn(
-                            "inline-flex items-center gap-2 px-5 py-3 rounded-xl mb-4",
-                            "bg-gradient-to-r text-white shadow-lg",
-                            riskConfig_data.gradient
-                        )}>
-                            {riskConfig_data.icon}
-                            <span className="text-2xl font-bold">{riskConfig_data.label}</span>
-                        </div>
-                        <p className={cn("text-lg font-medium mb-3", riskConfig_data.color)}>
-                            {riskConfig_data.description}
-                        </p>
-                        <p className="text-gray-600 text-sm leading-relaxed max-w-lg">
-                            {analysisSummary}
-                        </p>
                     </div>
-
-                    {/* Risk Score Gauges - Larger */}
-                    <div className="flex gap-8 shrink-0">
-                        <CircularProgress
-                            value={riskAssessment.riskScore}
-                            size={130}
-                            strokeWidth={10}
-                            color={riskConfig_data.color}
-                            label="위험 점수"
-                        />
-                        <CircularProgress
-                            value={riskAssessment.confidenceLevel}
-                            size={130}
-                            strokeWidth={10}
-                            color="text-indigo-600"
-                            label="신뢰도"
-                        />
+                    <div>
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full">
+                            <BrainIcon className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
+                            <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">AI 분석 신뢰도: {riskAssessment.confidenceLevel}%</span>
+                        </div>
                     </div>
                 </div>
 
-                {/* Scam Type Info */}
-                <div className="mt-6 pt-6 border-t border-current/10">
-                    <div className="flex flex-col md:flex-row md:items-center gap-4">
-                        <div className="flex items-center gap-2">
-                            <Target className={cn("w-5 h-5", riskConfig_data.color)} />
-                            <span className="font-semibold text-gray-900">사기 유형:</span>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                            <span className={cn(
-                                "px-3 py-1.5 rounded-lg text-sm font-medium border",
-                                riskConfig_data.bgColor,
-                                riskConfig_data.color,
-                                riskConfig_data.borderColor
-                            )}>
-                                {scamTypeLabels[scamClassification.scamType] || scamClassification.scamType}
-                            </span>
-                            {scamClassification.scamSubType && (
-                                <span className="px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 border border-gray-200">
-                                    {scamClassification.scamSubType}
+                {/* Summary Content */}
+                <div className="flex-1 w-full space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 dark:border-gray-800 pb-4">
+                        <div>
+                            <div className="flex items-center gap-3 mb-1">
+                                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">AI 사기 분석 보고서</h1>
+                                <span className="bg-primary/10 text-primary border border-primary/20 px-3 py-1 rounded text-sm font-bold uppercase tracking-wide flex items-center gap-1">
+                                    <ShieldAlert className="w-4 h-4" />
+                                    사기 {riskConfig_data.label}
                                 </span>
-                            )}
+                            </div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Analyzed on {formatAnalysisTime(analysisDetails?.analysisTime)}
+                            </p>
+                        </div>
+                        <div className="flex gap-2">
+                            <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-700 transition-colors shadow-sm">
+                                <ShareIcon className="w-4 h-4" /> 공유하기
+                            </button>
+                            <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded hover:bg-primary-dark transition-colors shadow-sm shadow-primary/30">
+                                <DownloadIcon className="w-4 h-4" /> 보고서 다운로드
+                            </button>
                         </div>
                     </div>
-                    <p className="mt-3 text-sm text-gray-600 bg-white/60 p-3 rounded-lg">
-                        <span className="font-medium text-gray-900">분류 근거:</span>{' '}
-                        {scamClassification.classificationReason}
-                    </p>
+
+                    <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-5 border border-orange-100 dark:border-orange-900/30">
+                        <div className="flex items-start gap-3">
+                            <TravelExploreIcon className="w-5 h-5 text-primary mt-1" />
+                            <div>
+                                <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-2">
+                                    {scamTypeLabels[scamClassification.scamType] || scamClassification.scamType}가 의심됩니다
+                                </h3>
+                                <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4 text-sm">
+                                    {analysisSummary}
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700">
+                                        Type: {scamTypeLabels[scamClassification.scamType] || scamClassification.scamType}
+                                    </span>
+                                    {scamClassification.scamSubType && (
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700">
+                                            Sub-type: {scamClassification.scamSubType}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Classification Reason - Diagnostic Box */}
+                    <div className="bg-slate-50/80 dark:bg-slate-900/40 rounded-xl p-5 border border-slate-100 dark:border-slate-800/60 shadow-inner">
+                        <div className="flex items-center gap-2 mb-3">
+                            <Fingerprint className="w-5 h-5 text-slate-500 dark:text-slate-400" />
+                            <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-tight">AI 판단 근거 요약</h4>
+                        </div>
+                        <div className="pl-7 border-l-2 border-slate-200 dark:border-slate-700 ml-2.5">
+                            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed italic">
+                                "{scamClassification.classificationReason}"
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
