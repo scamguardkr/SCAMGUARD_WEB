@@ -367,21 +367,4 @@ const AnalysisPage = () => {
     );
 };
 
-// interface CardExampleProps {
-//     icon: React.ReactNode;
-//     title: string;
-//     desc: string;
-//     onClick?: () => void;
-// }
-
-// const CardExample = ({ icon, title, desc, onClick }: CardExampleProps) => (
-//     <button onClick={onClick} className="p-4 rounded-xl border border-gray-200 hover:border-primary/50 hover:bg-primary/5 transition-all text-left group">
-//         <div className="flex items-center gap-3 mb-2">
-//             {icon}
-//             <span className="font-semibold text-gray-900 group-hover:text-primary transition-colors">{title}</span>
-//         </div>
-//         <p className="text-sm text-gray-500">{desc}</p>
-//     </button>
-// );
-
 export default AnalysisPage;
