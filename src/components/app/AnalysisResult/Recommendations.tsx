@@ -12,7 +12,7 @@ const Recommendations: React.FC<RecommendationsProps> = ({ recommendation }) => 
         <SectionCard
             title="대응 권고"
             icon={<Scale className="w-5 h-5" />}
-            iconColor="bg-teal-100 text-teal-600"
+            iconColor="bg-[#ec6246]/10 text-[#ec6246]"
         >
             <div className="space-y-6">
                 {/* Immediate Actions */}
