@@ -31,7 +31,7 @@ interface ClassificationReasonCardProps {
 //     }
 // };
 
-const ClassificationReasonCard: React.FC<ClassificationReasonCardProps> = ({ riskLevel, scamClassification }) => {
+const ClassificationReasonCard: React.FC<ClassificationReasonCardProps> = ({ scamClassification }) => {
     // const cardStyle = riskLevelStyles[riskLevel];
 
     return (

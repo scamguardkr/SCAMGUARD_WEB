@@ -19,7 +19,7 @@ const RiskGauge: React.FC<RiskGaugeProps> = ({ riskScore, riskLevel, riskLevelLa
     const safeRiskScore = clampScore(riskScore);
     const needleAngle = scoreToNeedleAngle(safeRiskScore);
     const gradientId = React.useId();
-    const glowFilterId = React.useId();
+    // const glowFilterId = React.useId();
     const riskStyle = riskConfig[riskLevel];
     const [animatedNeedleAngle, setAnimatedNeedleAngle] = React.useState(-90);
 
